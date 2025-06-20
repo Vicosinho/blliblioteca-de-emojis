@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <title>Biblioteca de Emojis</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #ffffff; 
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s ease;
+    }
+
+    header {
+      background-color: #0a84ff;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0, 136, 255, 0.3);
+    }
+
+    input[type="text"] {
+      width: 80%;
+      max-width: 600px;
+      padding: 12px;
+      font-size: 16px;
+      margin: 20px auto;
+      display: block;
+      border: 1px solid #555;
+      border-radius: 8px;
+      background-color: #1e1e1e;
+      color: white;
+      transition: background-color 0.2s ease;
+    }
+
+    input[type="text"]:focus {
+      background-color: #333;
+      outline: none;
+      box-shadow: 0 0 8px rgba(10, 132, 255, 0.5);
+    }
+
+    .category {
+      margin: 30px 10px;
+    }
+
+    .category h2 {
+      color: #9ccaff;
+      margin-left: 20px;
+      font-size: 22px;
+      text-shadow: 1px 1px 5px rgba(255, 255, 255, 0.3);
+      border-bottom: 2px solid #0a84ff;
+      padding-bottom: 8px;
+      display: inline-block;
+    }
+
+    .emoji-grid {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 10px 20px;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .emoji-btn {
+      font-size: 32px;
+      margin: 6px;
+      padding: 15px;
+      border: none;
+      background: #1e1e1e;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s, box-shadow 0.3s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .emoji-btn:hover {
+      transform: scale(1.2);
+      background-color: #333;
+      box-shadow: 0 0 15px rgba(10, 132, 255, 0.5);
+    }
+
+    .emoji-btn:active {
+      transform: scale(0.95);
+    }
+
+    .emoji-btn::after {
+      content: "Copiado!";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(46, 204, 113, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      border-radius: 8px;
+    }
+
+    .emoji-btn.copied::after {
+      opacity: 1;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 30px;
+      color: #888;
+      font-size: 14px;
+    }
+
+    body.light-mode {
+      background-color: #f1f1f1;
+      color: #000;
+    }
+    body.light-mode input[type="text"],
+    body.light-mode .emoji-btn {
+      background-color: #fff;
+      color: #000;
+      border: 1px solid #ddd;
+    }
+    body.light-mode .emoji-btn:hover {
+      background-color: #f0f0f0;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    body.light-mode .emoji-btn.copied::after {
+      background-color: rgba(39, 174, 96, 0.9);
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #0a84ff;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    .theme-toggle:hover {
+      background: #0077cc;
+      transform: scale(1.05);
+    }
+
+    .emoji-of-the-day {
+      background: linear-gradient(135deg, #0a84ff, #5e2ced);
+      color: white;
+      padding: 20px;
+      margin: 20px auto;
+      border-radius: 12px;
+      max-width: 600px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .emoji-of-the-day h2 {
+      margin-top: 0;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .emoji-of-the-day .special-badge {
+      background-color: #ffcc00;
+      color: #333;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 8px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .emoji-of-the-day .big-emoji {
+      font-size: 60px;
+      margin: 10px 0;
+      transition: transform 0.3s;
+    }
+
+    .emoji-of-the-day .big-emoji:hover {
+      transform: scale(1.2) rotate(10deg);
+    }
+
+    .emoji-of-the-day .emoji-name {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .emoji-of-the-day .emoji-description {
+      font-size: 14px;
+      opacity: 0.9;
+      max-width: 80%;
+    }
+
+    .kaomoji-description {
+      font-size: 14px;
+      color: #aaa;
+      margin-top: 5px;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .kaomoji-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 10px;
+    }
+
+    .kaomoji-btn {
+      font-size: 24px;
+      margin: 6px;
+      padding: 10px 15px;
+      border: none;
+      background: #1e1e1e;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    body.light-mode .kaomoji-btn {
+      background-color: #fff;
+      border: 1px solid #ddd;
+    }
+
+    .kaomoji-btn:hover {
+      transform: scale(1.1);
+      background-color: #333;
+    }
+
+    body.light-mode .kaomoji-btn:hover {
+      background-color: #f0f0f0;
+    }
+
+    .kaomoji-btn.copied {
+      background-color: #2ecc71;
+      color: white;
+    }
+
+    .frequent-empty {
+      text-align: center;
+      color: #888;
+      font-style: italic;
+      padding: 20px;
+    }
+
+    .frequent-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .frequent-actions button {
+      background: #333;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.2s;
+    }
+
+    .frequent-actions button:hover {
+      background: #444;
+    }
+
+    body.light-mode .frequent-actions button {
+      background: #ddd;
+      color: #333;
+    }
+
+    body.light-mode .frequent-actions button:hover {
+      background: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🌐 Biblioteca de Emojis</h1>
+    <p>Explore, copie e compartilhe seus emojis favoritos! 👍</p>
+  </header>
+
+  <button class="theme-toggle" onclick="toggleTheme()">🌓 Alternar Tema</button>
+
+  <div class="emoji-of-the-day" id="emojiOfTheDay">
+    <!-- Será preenchido pelo JavaScript -->
+  </div>
+
+  <input type="text" id="searchInput" placeholder="🔍 Buscar emojis (ex: coração, gato, pizza...)">
+
+  <div class="category" id="frequentSection">
+    <h2>⭐ Seus Emojis Favoritos</h2>
+    <div class="emoji-grid" id="frequentGrid"></div>
+    <div id="frequentEmpty" class="frequent-empty">Ainda não há emojis favoritos. Comece clicando em alguns emojis!</div>
+    <div class="frequent-actions" id="frequentActions" style="display: none;">
+      <button onclick="clearFrequent()">Limpar Favoritos</button>
+      <button onclick="exportFrequent()">Exportar</button>
+      <button onclick="importFrequent()">Importar</button>
+    </div>
+  </div>
+
+  <div id="emojiSections"></div>
+
+  <div class="footer">Disponível para celular e computador | Divirta-se usando emojis! 👈(⌒▽⌒)👉</div>
+
+  <script>
+    const emojiData = {
+      "Carinhas": [
+        { char: "😀", name: "rosto sorridente" },
+        { char: "😂", name: "rosto com lágrimas de alegria" },
+        { char: "😍", name: "rosto com olhos de coração" },
+        { char: "🤔", name: "rosto pensativo" },
+        { char: "🥰", name: "rosto sorridente com corações" },
+        { char: "😎", name: "rosto com óculos escuros" },
+        { char: "😡", name: "rosto com raiva" },
+        { char: "😴", name: "rosto dormindo" },
+        { char: "🥵", name: "rosto com calor" },
+        { char: "😭", name: "rosto chorando alto" },
+        { char: "😇", name: "rosto angelical" },
+        { char: "🤯", name: "rosto com cabeça explodindo" },
+        { char: "😶‍🌫️", name: "rosto nas nuvens" }
+      ],
+      "Animais": [
+        { char: "🐶", name: "cachorro" },
+        { char: "🐱", name: "gato" },
+        { char: "🐰", name: "coelho" },
+        { char: "🐻", name: "urso" },
+        { char: "🦊", name: "raposa" },
+        { char: "🦁", name: "leão" },
+        { char: "🐷", name: "porco" },
+        { char: "🐼", name: "panda" },
+        { char: "🐸", name: "sapo" },
+        { char: "🐔", name: "galinha" },
+        { char: "🦄", name: "unicórnio" },
+        { char: "🙈", name: "panda" },
+        { char: "🙉", name: "sapo" },
+        { char: "🙊", name: "galinha" },
+        { char: "🐵", name: "unicórnio" }
+      ],
+      "Comidas": [
+        { char: "🍕", name: "pizza" },
+        { char: "🍔", name: "hambúrguer" },
+        { char: "🍟", name: "batata frita" },
+        { char: "🌮", name: "taco" },
+        { char: "🍗", name: "coxa de frango" },
+        { char: "🍣", name: "sushi" },
+        { char: "🍩", name: "rosquinha" },
+        { char: "🍓", name: "morango" },
+        { char: "🍉", name: "melancia" },
+        { char: "🍦", name: "sorvete" },
+        { char: "🥤", name: "refrigerante" }
+      ],
+      "Natureza": [
+        { char: "🌳", name: "árvore" },
+        { char: "🌸", name: "flor de cerejeira" },
+        { char: "🌍", name: "globo terrestre" },
+        { char: "🌺", name: "hibisco" },
+        { char: "🌊", name: "onda" },
+        { char: "🌈", name: "arco-íris" },
+        { char: "🌻", name: "girassol" },
+        { char: "🌞", name: "sol" }
+      ],
+      "Profissões": [
+        { char: "👩‍⚕️", name: "enfermeira" },
+        { char: "👨‍⚕️", name: "médico" },
+        { char: "👩‍🏫", name: "professora" },
+        { char: "👨‍🏫", name: "professor" },
+        { char: "👩‍💻", name: "tecnóloga" },
+        { char: "👨‍💻", name: "programador" },
+      ],
+      "Festas": [
+        { char: "🎉", name: "confeete" },
+        { char: "🎂", name: "bolo de aniversário" },
+        { char: "🎁", name: "presente" },
+        { char: "🥳", name: "rosto festivo" },
+        { char: "🪩", name: "bola espelhada" },
+      ],
+      "Esportes": [
+        { char: "⚽", name: "bola de futebol" },
+        { char: "🏀", name: "bola de basquete" },
+        { char: "🏈", name: "bola de futebol americano" },
+        { char: "🎾", name: "bola de tênis" },
+        { char: "🏏", name: "taco de críquete" },
+        { char: "🏐", name: "bola de vôlei" }
+      ],
+      "Instrumentos": [
+        { char: "🎸", name: "guitarra" },
+        { char: "🎻", name: "violino" },
+        { char: "🎷", name: "saxofone" },
+        { char: "🎺", name: "trompete" },
+        { char: "🎹", name: "teclado musical" },
+        { char: "🥁", name: "bateria" }
+      ],
+      "Transportes": [
+        { char: "🚗", name: "carro" },
+        { char: "🚂", name: "trem" },
+        { char: "🚀", name: "foguete" },
+        { char: "🚴", name: "bicicleta" },
+        { char: "🚢", name: "navio" },
+        { char: "✈️", name: "avião" }
+      ],
+      "Objetos": [
+        { char: "💻", name: "notebook" },
+        { char: "📱", name: "celular" },
+        { char: "📸", name: "câmera" },
+        { char: "🎧", name: "fones de ouvido" },
+        { char: "🎮", name: "controle de videogame" },
+        { char: "🖥️", name: "computador" },
+        { char: "🔋", name: "bateria" },
+        { char: "🪫", name: "bateria fraca" },
+        { char: "🧠", name: "cérebro" },
+        { char: "🛰️", name: "satélite" },
+        { char: "⚙️", name: "engrenagem" },
+        { char: "📡", name: "antena" }
+      ],
+      "Corações e Estrelas": [
+        { char: "❤️", name: "coração vermelho" },
+        { char: "🩷", name: "coração rosa" },
+        { char: "🧡", name: "coração laranja" },
+        { char: "💛", name: "coração amarelo" },
+        { char: "💚", name: "coração verde" },
+        { char: "💙", name: "coração azul" },
+        { char: "🩵", name: "coração azul claro" },
+        { char: "💜", name: "coração roxo" },
+        { char: "🤎", name: "coração marrom" },
+        { char: "🖤", name: "coração preto" },
+        { char: "⭐", name: "estrela" }
+      ],
+      "Mão com polegar levantado": [
+        { char: "👍", name: "joinha" },
+        { char: "👍🏻", name: "joinha: tom de pele claro" },
+        { char: "👍🏼", name: "joinha: tom de pele médio-claro" },
+        { char: "👍🏽", name: "joinha: tom de pele médio" },
+        { char: "👍🏾", name: "joinha: tom de pele médio-escuro" },
+        { char: "👍🏿", name: "joinha: tom de pele escuro" }
+      ],
+      "Ficção Científica": [
+        { char: "👽", name: "alienígena" },
+        { char: "🛸", name: "disco voador" },
+        { char: "👾", name: "monstro de videogame" },
+        { char: "🧬", name: "DNA" },
+        { char: "🔭", name: "telescópio" },
+        { char: "🌌", name: "via láctea" },
+        { char: "🧪", name: "tubo de ensaio" }
+      ],
+      "Construção": [
+        { char: "🧱", name: "tijolos" },
+        { char: "🔨", name: "martelo" },
+        { char: "🛠️", name: "ferramentas" },
+        { char: "🔧", name: "chave inglesa" },
+        { char: "⚙️", name: "engrenagem" },
+        { char: "🏗️", name: "construção" },
+        { char: "🚧", name: "sinal de construção" }
+      ],
+      "Tesouro": [
+        { char: "💰", name: "saco de dinheiro" },
+        { char: "💵", name: "notas de dólar" },
+        { char: "💎", name: "diamante" },
+        { char: "🪙", name: "moeda" },
+        { char: "🏦", name: "banco" },
+        { char: "📈", name: "gráfico subindo" }
+      ],
+      "Natureza Selvagem": [
+        { char: "🌵", name: "cacto" },
+        { char: "🌲", name: "pinheiro" },
+        { char: "🪵", name: "madeira" },
+        { char: "🌋", name: "vulcão" },
+        { char: "🪨", name: "pedra" },
+        { char: "🏔️", name: "montanha nevada" },
+        { char: "🌾", name: "feixe de arroz" }
+      ],
+      "Terror": [
+        { char: "🧛", name: "vampiro" },
+        { char: "🧟", name: "zumbi" },
+        { char: "🧙", name: "mago" },
+        { char: "🕸️", name: "teia de aranha" },
+        { char: "🦇", name: "morcego" },
+        { char: "💀", name: "caveira" },
+        { char: "⚰️", name: "caixão" }
+      ],
+      "Segurança": [
+        { char: "🚨", name: "luz de polícia" },
+        { char: "🧯", name: "extintor de incêndio" },
+        { char: "🛡️", name: "escudo" },
+        { char: "⛑️", name: "capacete de resgate" },
+        { char: "🪪", name: "carteira de identidade" },
+        { char: "📛", name: "crachá" },
+        { char: "🔒", name: "cadeado fechado" }
+      ],
+      "Jogos e Diversão": [
+        { char: "🎮", name: "videogame" },
+        { char: "🕹️", name: "joystick" },
+        { char: "🎲", name: "dado" },
+        { char: "♟️", name: "peão de xadrez" },
+        { char: "🧩", name: "peça de quebra-cabeça" },
+        { char: "🃏", name: "curinga" },
+        { char: "🎰", name: "caça-níquel" }
+      ],
+      "Educação": [
+        { char: "📚", name: "livros" },
+        { char: "🧠", name: "cérebro" },
+        { char: "🖊️", name: "caneta" },
+        { char: "📖", name: "livro aberto" },
+        { char: "📝", name: "bloco de notas" },
+        { char: "🏫", name: "escola" },
+        { char: "🎓", name: "chapéu de formatura" }
+      ],      
+      "Kaomoji (emojis de texto japonês)": [
+        { char: "⚆_⚆", name: "olhos arregalados, surpresa ou curiosidade" },
+        { char: "(❁´◡❁)", name: "rosto feliz e sorridente com bochechas rosadas" },
+        { char: "(●'◡'●)", name: "rosto redondo e feliz com olhos fechados" },
+        { char: "^_^", name: "sorriso simples e feliz" },
+        { char: "✪ ω ✪", name: "rosto animado com olhos brilhantes" },
+        { char: "👈(⌒▽⌒)👉", name: "gesto de apontar com expressão feliz" },
+        { char: "(❤️´艸｀❤️)", name: "rosto apaixonado com corações" },
+        { char: "( ˘︹˘ )", name: "rosto triste ou chorando" },
+      ], 
+    };
+
+    // Feriados e eventos especiais (data em formato MM-DD)
+    const specialEvents = {
+      "01-01": { emoji: "🎆", name: "Ano Novo", description: "Feliz Ano Novo!" },
+      "01-06": { emoji: "👑", name: "Dia de Reis", description: "Dia dos Três Reis Magos" },
+      "02-02": { emoji: "🦔", name: "Dia da Marmota", description: "Previsão do tempo tradicional" },
+      "02-14": { emoji: "❤️", name: "Dia dos Namorados", description: "Dia do Amor!" },
+      "02-20": { emoji: "🐱", name: "Dia do Gato", description: "Dia Internacional do Gato" },
+      "03-08": { emoji: "👩", name: "Dia da Mulher", description: "Dia Internacional da Mulher" },
+      "03-14": { emoji: "🥧", name: "Dia do Pi", description: "Dia da constante matemática π" },
+      "03-17": { emoji: "🍀", name: "St. Patrick", description: "Dia de São Patrício" },
+      "04-01": { emoji: "🤡", name: "Dia da Mentira", description: "1º de Abril - Cuidado com as pegadinhas!" },
+      "04-12": { emoji: "🚀", name: "Dia do Cosmonauta", description: "Dia da Aviação e Cosmonáutica" },
+      "04-21": { emoji: "🇧🇷", name: "Tiradentes", description: "Feriado de Tiradentes" },
+      "04-22": { emoji: "🌍", name: "Dia da Terra", description: "Dia Internacional do Planeta Terra" },
+      "05-01": { emoji: "👷", name: "Dia do Trabalho", description: "Dia Internacional dos Trabalhadores" },
+      "05-05": { emoji: "🎮", name: "Dia do Videogame", description: "Dia Mundial do Videogame" },
+      "05-12": { emoji: "👩", name: "Dia das Mães", description: "Dia Internacional das Mães" },
+      "05-25": { emoji: "🪐", name: "Dia da Toalha", description: "Homenagem a Douglas Adams" },
+      "06-05": { emoji: "🌳", name: "Dia do Meio Ambiente", description: "Dia Mundial do Meio Ambiente" },
+      "06-12": { emoji: "💘", name: "Dia dos Namorados (BR)", description: "Dia dos Namorados no Brasil" },
+      "06-21": { emoji: "☀️", name: "Solstício de Verão", description: "Dia mais longo do ano no hemisfério norte" },
+      "07-02": { emoji: "👽", name: "Dia do OVNI", description: "Dia Mundial do OVNI" },
+      "07-20": { emoji: "🌕", name: "Dia da Lua", description: "Aniversário do pouso na Lua" },
+      "08-12": { emoji: "🦁", name: "Dia do Leão", description: "Dia Mundial do Leão" },
+      "09-07": { emoji: "🇧🇷", name: "Independência do Brasil", description: "7 de Setembro" },
+      "09-19": { emoji: "🏴‍☠️", name: "Dia do Pirata", description: "Fale como um pirata hoje!" },
+      "09-22": { emoji: "🍂", name: "Equinócio de Outono", description: "Primeiro dia do outono" },
+      "10-04": { emoji: "🐶", name: "Dia dos Animais", description: "Dia Mundial dos Animais" },
+      "10-12": { emoji: "👼", name: "Nossa Senhora Aparecida", description: "Padroeira do Brasil" },
+      "10-31": { emoji: "🎃", name: "Halloween", description: "Dia das Bruxas" },
+      "11-02": { emoji: "🕯️", name: "Finados", description: "Dia de Finados" },
+      "11-15": { emoji: "🏛️", name: "Proclamação da República", description: "Feriado Nacional" },
+      "11-20": { emoji: "⚖️", name: "Dia da Consciência Negra", description: "Dia da Consciência Negra no Brasil" },
+      "12-05": { emoji: "🥷🏻", name: "Dia do Ninja", description: "Dia Internacional do Ninja" },
+      "12-21": { emoji: "❄️", name: "Solstício de Inverno", description: "Dia mais curto do ano no hemisfério norte" },
+      "12-24": { emoji: "🎄", name: "Véspera de Natal", description: "Noite de Natal" },
+      "12-25": { emoji: "🎄", name: "Natal", description: "Feliz Natal!" },
+      "12-31": { emoji: "🎇", name: "Réveillon", description: "Véspera de Ano Novo" }
+    };
+
+    const searchInput = document.getElementById("searchInput");
+    const emojiSections = document.getElementById("emojiSections");
+    const frequentSection = document.getElementById("frequentSection");
+    const frequentGrid = document.getElementById("frequentGrid");
+    const frequentEmpty = document.getElementById("frequentEmpty");
+    const frequentActions = document.getElementById("frequentActions");
+    const emojiOfTheDay = document.getElementById("emojiOfTheDay");
+
+    // Emoji do dia (baseado na data)
+    function getEmojiOfTheDay() {
+      const today = new Date();
+      const dateStr = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      
+      // Verifica se é um feriado/evento especial
+      if (specialEvents[dateStr]) {
+        const event = specialEvents[dateStr];
+        return {
+          emoji: event.emoji,
+          name: event.name,
+          description: event.description,
+          isSpecial: true
+        };
+      }
+      
+      // Se não for feriado, escolhe um emoji aleatório baseado no dia do ano
+      const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+      const allEmojis = Object.values(emojiData).flat();
+      const randomIndex = (dayOfYear * 13) % allEmojis.length; // Número "pseudo-aleatório" baseado na data
+      
+      return {
+        emoji: allEmojis[randomIndex].char,
+        name: allEmojis[randomIndex].name,
+        description: "Emoji especial do dia!",
+        isSpecial: false
+      };
+    }
+
+    function renderEmojiOfTheDay() {
+      const { emoji, name, description, isSpecial } = getEmojiOfTheDay();
+      
+      emojiOfTheDay.innerHTML = `
+        <h2>
+          Emoji do Dia 
+          ${isSpecial ? '<span class="special-badge">EVENTO ESPECIAL!</span>' : ''}
+        </h2>
+        <div class="big-emoji" title="${name}">${emoji}</div>
+        <div class="emoji-name">${name}</div>
+        <div class="emoji-description">${description}</div>
+      `;
+      
+      // Adiciona funcionalidade de copiar
+      const bigEmoji = emojiOfTheDay.querySelector('.big-emoji');
+      bigEmoji.addEventListener('click', () => {
+        navigator.clipboard.writeText(emoji);
+        
+        // Efeito visual
+        bigEmoji.style.transform = 'scale(1.5) rotate(20deg)';
+        setTimeout(() => {
+          bigEmoji.style.transform = 'scale(1.2) rotate(10deg)';
+        }, 300);
+      });
+    }
+
+    function getFrequentEmojis() {
+      const stored = localStorage.getItem("frequentEmojis");
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    function updateFrequent(char) {
+      let frequent = getFrequentEmojis();
+      const existing = frequent.find(e => e.char === char);
+      if (existing) {
+        existing.count++;
+      } else {
+        frequent.push({ char, count: 1 });
+      }
+      frequent = frequent.sort((a, b) => b.count - a.count).slice(0, 20);
+      localStorage.setItem("frequentEmojis", JSON.stringify(frequent));
+      renderFrequent();
+    }
+
+    function clearFrequent() {
+      if (confirm("Tem certeza que deseja limpar seus emojis favoritos?")) {
+        localStorage.removeItem("frequentEmojis");
+        renderFrequent();
+      }
+    }
+
+    function exportFrequent() {
+      const frequent = getFrequentEmojis();
+      if (frequent.length === 0) {
+        alert("Você não tem emojis favoritos para exportar!");
+        return;
+      }
+      
+      const dataStr = JSON.stringify(frequent, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportName = 'meus-emojis-favoritos.json';
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportName);
+      linkElement.click();
+    }
+
+    function importFrequent() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      
+      input.onchange = e => { 
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = event => {
+          try {
+            const imported = JSON.parse(event.target.result);
+            if (Array.isArray(imported) && imported.every(e => e.char && e.count)) {
+              localStorage.setItem("frequentEmojis", JSON.stringify(imported));
+              renderFrequent();
+              alert("Emojis favoritos importados com sucesso!");
+            } else {
+              alert("O arquivo não contém dados válidos de emojis favoritos.");
+            }
+          } catch (error) {
+            alert("Erro ao ler o arquivo: " + error.message);
+          }
+        };
+        
+        reader.readAsText(file);
+      };
+      
+      input.click();
+    }
+
+    function renderFrequent() {
+      const frequent = getFrequentEmojis();
+      
+      if (frequent.length === 0) {
+        frequentEmpty.style.display = "block";
+        frequentActions.style.display = "none";
+        frequentGrid.innerHTML = "";
+        return;
+      }
+
+      frequentEmpty.style.display = "none";
+      frequentActions.style.display = "flex";
+      frequentGrid.innerHTML = "";
+
+      frequent.forEach(e => {
+        const btn = createEmojiButton(e.char, `${e.char} (usado ${e.count} ${e.count === 1 ? 'vez' : 'vezes'})`);
+        frequentGrid.appendChild(btn);
+      });
+    }
+
+    function createEmojiButton(char, title) {
+      const button = document.createElement("button");
+      button.className = "emoji-btn";
+      button.textContent = char;
+      button.title = title;
+
+      button.addEventListener("click", () => {
+        navigator.clipboard.writeText(char);
+        button.classList.add("copied");
+        setTimeout(() => button.classList.remove("copied"), 1000);
+        updateFrequent(char);
+      });
+
+      return button;
+    }
+
+    function createKaomojiButton(kaomoji, description) {
+      const container = document.createElement("div");
+      container.className = "kaomoji-item";
+      
+      const button = document.createElement("button");
+      button.className = "kaomoji-btn";
+      button.textContent = kaomoji;
+      button.title = "Clique para copiar";
+      
+      const desc = document.createElement("div");
+      desc.className = "kaomoji-description";
+      desc.textContent = description;
+      
+      button.addEventListener("click", () => {
+        navigator.clipboard.writeText(kaomoji);
+        button.classList.add("copied");
+        setTimeout(() => button.classList.remove("copied"), 1000);
+        updateFrequent(kaomoji);
+      });
+      
+      container.appendChild(button);
+      container.appendChild(desc);
+      return container;
+    }
+
+    function renderEmojis(filter = "") {
+      emojiSections.innerHTML = "";
+
+      Object.entries(emojiData).forEach(([category, emojis]) => {
+        const filtered = emojis.filter(e => 
+          e.name.toLowerCase().includes(filter.toLowerCase()) || 
+          e.char.toLowerCase().includes(filter.toLowerCase())
+        );
+
+        if (filtered.length > 0) {
+          const section = document.createElement("div");
+          section.className = "category";
+
+          const title = document.createElement("h2");
+          title.textContent = category;
+          section.appendChild(title);
+
+          const grid = document.createElement("div");
+          grid.className = "emoji-grid";
+
+          filtered.forEach(emoji => {
+            if (category === "Kaomoji (emojis de texto japonês)") {
+              const item = createKaomojiButton(emoji.char, emoji.name);
+              grid.appendChild(item);
+            } else {
+              const btn = createEmojiButton(emoji.char, emoji.name);
+              grid.appendChild(btn);
+            }
+          });
+
+          section.appendChild(grid);
+          emojiSections.appendChild(section);
+        }
+      });
+    }
+
+    searchInput.addEventListener("input", () => {
+      renderEmojis(searchInput.value);
+    });
+
+    function toggleTheme() {
+      document.body.classList.toggle("light-mode");
+      localStorage.setItem("theme", document.body.classList.contains("light-mode") ? "light" : "dark");
+      
+      // Atualiza o texto do botão
+      const themeToggle = document.querySelector('.theme-toggle');
+      if (document.body.classList.contains("light-mode")) {
+        themeToggle.innerHTML = '🌙 Tema Escuro';
+      } else {
+        themeToggle.innerHTML = '☀️ Tema Claro';
+      }
+    }
+
+    // Inicialização
+    (function () {
+      // Tema
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "light") {
+        document.body.classList.add("light-mode");
+        document.querySelector('.theme-toggle').innerHTML = '🌙 Tema Escuro';
+      } else {
+        document.querySelector('.theme-toggle').innerHTML = '☀️ Tema Claro';
+      }
+      
+      // Renderiza tudo
+      renderEmojiOfTheDay();
+      renderFrequent();
+      renderEmojis();
+    })();
+  </script>
+</body>
+</html>
